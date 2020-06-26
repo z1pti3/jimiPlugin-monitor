@@ -31,7 +31,7 @@ class _monitorMSSQL(action._action):
 			
 		startTime=time.time()
 		try:
-			connection = pyodbc.connect("Driver={SQL Server Native Client 11.0};""Server={0};""Database={1};""uid={2};pwd={3}".format(host,database,username,password),timeout=timeout)
+			connection = pyodbc.connect("Driver={0};Server={1};Database={2};uid={3};pwd={4}".format(pyodbc.drivers()[0],host,database,username,password),timeout=timeout)
 			connection.close()
 			endTime=time.time()
 			duration = endTime - startTime
