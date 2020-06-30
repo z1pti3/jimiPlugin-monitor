@@ -44,7 +44,7 @@ class _monitorMSSQL(action._action):
 		finally:
 			endTime=time.time()
 			duration = endTime - startTime
-			actionResult["data"] = { "startTime" : startTime, "endTime" : endTime, "duration" : duration, "status": "up" }
+			actionResult["data"] = { "server" : host, "database" : database, "startTime" : startTime, "endTime" : endTime, "duration" : duration, "status": "up" }
 
 		return actionResult
 
