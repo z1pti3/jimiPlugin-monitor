@@ -28,6 +28,8 @@ class _monitorMSSQL(action._action):
 		timeout = 30
 		if self.timeout != 0:
 			timeout=self.timeout
+
+		status = "up"
 			
 		startTime=time.time()
 		try:
@@ -41,10 +43,11 @@ class _monitorMSSQL(action._action):
 		except:
 			actionResult["result"] = False
 			actionResult["rc"] = 504
+			status = "down"
 		finally:
 			endTime=time.time()
 			duration = endTime - startTime
-			actionResult["data"] = { "server" : host, "database" : database, "startTime" : startTime, "endTime" : endTime, "duration" : duration, "status": "up" }
+			actionResult["data"] = { "server" : host, "database" : database, "startTime" : startTime, "endTime" : endTime, "duration" : duration, "status": status }
 
 		return actionResult
 
