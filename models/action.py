@@ -112,8 +112,8 @@ class _monitorPing(action._action):
 					actionResult["received"] = int(outPacketMatches[0][1])
 					actionResult["lost"] = int(outPacketMatches[0][0]) - int(outPacketMatches[0][1])
 					actionResult["min_rtt"] = float(outResponseMatches[0][0])
-					actionResult["max_rtt"] = float(outResponseMatches[0][1])
-					actionResult["avg_rtt"] = float(outResponseMatches[0][2])
+					actionResult["max_rtt"] = float(outResponseMatches[0][2])
+					actionResult["avg_rtt"] = float(outResponseMatches[0][1])
 				else:
 					actionResult["result"] = False
 					actionResult["rc"] = 9
