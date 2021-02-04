@@ -3,10 +3,11 @@ import subprocess
 import re
 import platform
 
-from core.models import action
-from core import helpers, auth, db
+from plugins.monitor.models import monitor
 
-class _monitorMSSQL(action._action):
+import jimi
+
+class _monitorMSSQL(jimi.action._action):
 	host = str()
 	username = str()
 	password = str()
@@ -15,18 +16,18 @@ class _monitorMSSQL(action._action):
 
 	def setAttribute(self,attr,value,sessionData=None):
 		if attr == "password" and not value.startswith("ENC "):
-			if db.fieldACLAccess(sessionData,self.acl,attr,accessType="write"):
-				self.password = "ENC {0}".format(auth.getENCFromPassword(value))
+			if jimi.db.fieldACLAccess(sessionData,self.acl,attr,accessType="write"):
+				self.password = "ENC {0}".format(jimi.auth.getENCFromPassword(value))
 				return True
 			return False
 		return super(_monitorMSSQL, self).setAttribute(attr,value,sessionData=sessionData)
 
 	def run(self,data,persistentData,actionResult):
 		import pyodbc
-		host = helpers.evalString(self.host,{"data" : data})
-		username = helpers.evalString(self.username,{"data" : data})
-		database = helpers.evalString(self.database,{"data" : data})
-		password = auth.getPasswordFromENC(self.password)
+		host = jimi.helpers.evalString(self.host,{"data" : data})
+		username = jimi.helpers.evalString(self.username,{"data" : data})
+		database = jimi.helpers.evalString(self.database,{"data" : data})
+		password = jimi.auth.getPasswordFromENC(self.password)
 
 		timeout = 30
 		if self.timeout != 0:
@@ -54,11 +55,11 @@ class _monitorMSSQL(action._action):
 
 		return actionResult
 
-class _monitorPing(action._action):
+class _monitorPing(jimi.action._action):
 	host = str()
 
 	def run(self,data,persistentData,actionResult):
-		host = helpers.evalString(self.host,{"data" : data})
+		host = jimi.helpers.evalString(self.host,{"data" : data})
 		actionResult["result"] = False
 		actionResult["up"] = False
 		actionResult["rc"] = 999
@@ -123,3 +124,54 @@ class _monitorPing(action._action):
 					actionResult["received"] = int(outPacketMatches[0][1])
 					actionResult["lost"] = int(outPacketMatches[0][0]) - int(outPacketMatches[0][1])
 		return actionResult
+
+
+class _monitorGetStatus(jimi.action._action):
+	itemName = str()
+
+	def __init__(self):
+		jimi.cache.globalCache.newCache("monitorCache")
+
+	def run(self,data,persistentData,actionResult):
+		itemName = jimi.helpers.evalString(self.itemName,{"data" : data})
+
+		cacheItem = jimi.cache.globalCache.get("monitorCache",itemName,getMonitorItem)
+		if cacheItem != None:
+			cacheItem = cacheItem[0]
+			actionResult["result"] = True
+			actionResult["rc"] = 0
+			actionResult["monitor"] = { "name" : cacheItem.name, "up" : cacheItem.up, "lastSeen" : cacheItem.lastSeen }
+			return actionResult
+		actionResult["result"] = False
+		actionResult["rc"] = 404
+		actionResult["msg"] = "No monitor item found with that itemName"
+		return actionResult
+
+class _monitorSetStatus(jimi.action._action):
+	itemName = str()
+	itemStatus = bool()
+
+	def __init__(self):
+		jimi.cache.globalCache.newCache("monitorCache")
+
+	def run(self,data,persistentData,actionResult):
+		itemName = jimi.helpers.evalString(self.itemName,{"data" : data})
+
+		cacheItem = jimi.cache.globalCache.get("monitorCache",itemName,getMonitorItem)
+		if cacheItem == None:
+			monitor._monitor().new(self.acl,itemName,self.itemStatus)
+			actionResult["result"] = True
+			actionResult["rc"] = 0
+			return actionResult
+		else:
+			cacheItem = cacheItem[0]
+			cacheItem.up = self.itemStatus
+			cacheItem.lastSeen = int(time.time())
+			cacheItem.update(["up","lastSeen"])
+			actionResult["result"] = True
+			actionResult["rc"] = 0
+			return actionResult
+		
+
+def getMonitorItem(itemName,sessionData):
+	return monitor._monitor().getAsClass(query={ "name" : itemName })

@@ -1,0 +1,78 @@
+<script src="{{ url_for('static', filename='includes/jquery/js/jquery-3.4.1.js') }}"></script>
+<script src="{{ url_for('static', filename='includes/jquery/js/jquery.datatables.min.js') }}"></script>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='includes/datatables/css/dataTables.bootstrap.css') }}">
+<script src="{{ url_for('static', filename='includes/datatables/js/dataTables.bootstrap.js') }}"></script>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='includes/bootstrap-3.3.7/css/bootstrap.min.css') }}">
+<script src="{{ url_for('static', filename='includes/bootstrap-3.3.7/js/bootstrap.min.js') }}"></script>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/datatable.css') }}">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='themes/default/default.css') }}">
+
+<script>
+    var CSRF = "{{CSRF}}"
+</script>
+
+<html>
+    <head>
+        
+    </head>
+    <body class="theme-panelContainer">
+        <button class="btn btn-primary createObject theme-panelButton" onclick="createDashboard()">New</button>
+        <table id="orderTable" class="table table-sm theme-table" cellspacing="0" width="100%">
+            <thead class="theme-tableHeader">
+                <tr>
+                    <th class="th-sm">Dashboard</th>
+                    <th class="th-sm">Options</th>
+                </tr>
+            </thead>
+            <tbody class="theme-tableBody">
+                {% for dashboard in dashboards %}
+                    <tr>
+                        <td><a href='monitor/dashboard/?dashboardID={{ dashboard["_id"] }}'>{{ dashboard["name"] }}</a></td>
+                        <td><button class="btn btn-primary createObject theme-panelButton" onclick="deleteDashboard('{{ dashboard["_id"] }}')">Delete</button></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </body>
+</html>
+
+<script>
+    $(document).ready(function () {
+        $('#orderTable').DataTable({
+            "paging" : false,
+            "stripeClasses" : [ 'theme-tableRowOdd', 'theme-tableRowEven' ],
+            fixedHeader: {
+                header: true,
+                footer: true
+            },
+        });
+        $('.dataTables_length').addClass('bs-select');
+        $('.dataTables_filter input[type="search"]').css({'width':'200px'});
+        $('.dataTables_filter input[type="search"]').addClass("theme-panelTextbox");
+    });
+
+    function createDashboard() {
+        var dashboardName = prompt("Please enter a dashboard name", "Dashboard1");
+        if (dashboardName != null && dashboardName != "") {
+            $.ajax({url:"", data: JSON.stringify({CSRF: CSRF, dashboardName: dashboardName}), contentType:"application/json", type:"PUT", success: function ( result ) {
+                location.reload();
+                }
+            })
+        }
+    }
+
+    function deleteDashboard(id) {
+        if (confirm("Are you sure you want to delete this dashboard?")) {
+            $.ajax({url:"", data: JSON.stringify({CSRF: CSRF, id: id}), contentType:"application/json", type:"DELETE", success: function ( result ) {
+                location.reload();
+                }
+            })
+        }
+    }
+
+
+</script>
