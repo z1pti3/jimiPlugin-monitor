@@ -140,7 +140,7 @@ class _monitorGetStatus(jimi.action._action):
 			cacheItem = cacheItem[0]
 			actionResult["result"] = True
 			actionResult["rc"] = 0
-			actionResult["monitor"] = { "name" : cacheItem.name, "up" : cacheItem.up, "lastSeen" : cacheItem.lastSeen }
+			actionResult["monitor"] = { "name" : cacheItem.name, "up" : cacheItem.up, "type" : cacheItem.itemType, "lastSeen" : cacheItem.lastSeen }
 			return actionResult
 		actionResult["result"] = False
 		actionResult["rc"] = 404
@@ -150,16 +150,18 @@ class _monitorGetStatus(jimi.action._action):
 class _monitorSetStatus(jimi.action._action):
 	itemName = str()
 	itemStatus = bool()
+	itemType = str()
 
 	def __init__(self):
 		jimi.cache.globalCache.newCache("monitorCache")
 
 	def run(self,data,persistentData,actionResult):
 		itemName = jimi.helpers.evalString(self.itemName,{"data" : data})
+		itemType = jimi.helpers.evalString(self.itemType,{"data" : data})
 
 		cacheItem = jimi.cache.globalCache.get("monitorCache",itemName,getMonitorItem)
 		if cacheItem == None:
-			monitor._monitor().new(self.acl,itemName,self.itemStatus)
+			monitor._monitor().new(self.acl,itemName,self.itemStatus,itemType)
 			actionResult["result"] = True
 			actionResult["rc"] = 0
 			return actionResult

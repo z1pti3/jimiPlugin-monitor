@@ -36,12 +36,31 @@ $(document).ready(function () {
 		if (event.keyCode == 46 && document.activeElement.type != "text" && document.activeElement.type != "checkbox" && document.activeElement.type != "textarea") {
 			deleteSelected();
 		}
+		console.log(event.keyCode)
+		if (event.keyCode == 187) {
+			changeSelectedSize("+");
+		}
+		if (event.keyCode == 189) {
+			changeSelectedSize("-");
+		}
 		cKeyState = false;
 	});
 });
 
 function autoupdate() {
 	setTimeout(updateFlowchart, 2500);
+}
+
+function changeSelectedSize(moreLess) {
+	selectedNodes = network.getSelectedNodes()
+	if (selectedNodes.length == 1) {
+		node = nodeObjects[selectedNodes[0]]["flowID"]
+		var dashboardID = GetURLParameter("dashboardID");
+		$.ajax({url:"/plugin/monitor/dashboard/"+dashboardID+"/size/"+node+"/"+moreLess+"/", data: JSON.stringify({ CSRF: CSRF }), type:"POST", contentType:"application/json", success: function ( responseData ) {
+				
+			}
+		});
+	}
 }
 
 function deleteSelected() {
@@ -94,6 +113,12 @@ function updateNode(flow) {
 			if ("color" in flow["node"]) {
 				flowObjects[flow["flowID"]]["node"]["color"] = flow["node"]["color"]
 			}
+			if ("image" in flow["node"]) {
+				flowObjects[flow["flowID"]]["node"]["image"] = flow["node"]["image"]
+			}
+			if ("size" in flow["node"]) {
+				flowObjects[flow["flowID"]]["node"]["size"] = flow["node"]["size"]
+			}
 			if ("label" in flow["node"]) {
 				flowObjects[flow["flowID"]]["node"]["label"] = flow["node"]["label"]
 			}
@@ -118,16 +143,10 @@ function createLinkRAW(from,to,color) {
 		color: {
 			color: color
 		},
-		arrows: {
-			middle: {
-			  enabled: true,
-			  type: "arrow"
-			}
-		},
 		smooth: {
 			enabled: true,
 			type: "cubicBezier",
-			roundness: 0.7
+			roundness: 0.3
 		},
 		width: 1.5
 	 });

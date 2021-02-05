@@ -31,7 +31,7 @@
             <tbody class="theme-tableBody">
                 {% for dashboard in dashboards %}
                     <tr>
-                        <td><a href='monitor/dashboard/?dashboardID={{ dashboard["_id"] }}'>{{ dashboard["name"] }}</a></td>
+                        <td><a href='/plugin/monitor/dashboard/?dashboardID={{ dashboard["_id"] }}'>{{ dashboard["name"] }}</a></td>
                         <td><button class="btn btn-primary createObject theme-panelButton" onclick="deleteDashboard('{{ dashboard["_id"] }}')">Delete</button></td>
                     </tr>
                 {% endfor %}

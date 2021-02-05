@@ -5,14 +5,16 @@ import jimi
 class _monitor(jimi.db._document):
     name = str()
     up = bool()
+    itemType = str()
     lastSeen = int()
 
     _dbCollection = jimi.db.db["monitor"]
 
-    def new(self, acl, name, up):
+    def new(self, acl, name, up, itemType):
         self.acl = acl
         self.name = name
         self.up = up
+        self.itemType = itemType
         self.lastSeen = int(time.time())
         return super(_monitor, self).new()
 
