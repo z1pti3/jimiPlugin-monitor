@@ -36,7 +36,6 @@ $(document).ready(function () {
 		if (event.keyCode == 46 && document.activeElement.type != "text" && document.activeElement.type != "checkbox" && document.activeElement.type != "textarea") {
 			deleteSelected();
 		}
-		console.log(event.keyCode)
 		if (event.keyCode == 187) {
 			changeSelectedSize("+");
 		}
@@ -387,5 +386,10 @@ function setupFlowchart() {
 	});
 
 	updateFlowchart();
-}
 
+	canvas = network.canvas.frame.canvas;
+	ctx = canvas.getContext('2d');
+	network.on("beforeDrawing", function(ctx) {		
+		ctx.drawImage(document.getElementById("bgimage"), 0, 0);
+	});
+}

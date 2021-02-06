@@ -24,6 +24,7 @@ def urlencode_filter(s):
 
 @pluginPages.route('/monitor/includes/<file>')
 def custom_static(file):
+    # Directroy transversal safe?
     return send_from_directory(str(Path("plugins/monitor/web/includes")), file)
 
 @pluginPages.route("/monitor/", methods=["GET"])
@@ -45,7 +46,23 @@ def deleteDashboard():
 
 @pluginPages.route("/monitor/dashboard/", methods=["GET"])
 def dashboardPage():
-    return render_template("dashboard.html", CSRF=jimi.api.g.sessionData["CSRF"])
+    dashboardID = request.args.get('dashboardID')
+    dashboard = monitor._monitorWebDashboard().getAsClass(jimi.api.g.sessionData,id=dashboardID)
+    if len(dashboard) == 1:
+        dashboard = dashboard[0]
+        return render_template("dashboard.html", CSRF=jimi.api.g.sessionData["CSRF"], image=dashboard.image)
+    return {}, 404
+
+@pluginPages.route("/monitor/dashboard/<dashboardID>/image/", methods=["GET"])
+def dashboardSetImage(dashboardID):
+    image = request.args.get('image')
+    dashboard = monitor._monitorWebDashboard().getAsClass(jimi.api.g.sessionData,id=dashboardID)
+    if len(dashboard) == 1:
+        dashboard = dashboard[0]
+        dashboard.image = image
+        dashboard.update(["image"])
+        return {}, 200
+    return {}, 404
 
 @pluginPages.route("/monitor/dashboard/<dashboardID>/", methods=["POST"])
 def getDashboard(dashboardID):
@@ -157,11 +174,17 @@ def getDashboard(dashboardID):
             flowchartResponse["operators"][flowchartResponseType][dashboardID] = { "_id" : dashboardID, "flowID" : dashboardID, "name" : name, "node" : node }
 
         # Do any links need to be created
+        linkPopList = []
         for linkKey, linkValue in dashboard.monitorLinks.items():
             if linkKey not in flowchartLinks.keys():
-                flowchartResponse["links"]["create"][linkKey] = { "from" : linkValue["from"], "to" : linkValue["to"], "color" : "#3dbeff" }
+                if linkValue["to"] in flowchartOperators and linkValue["from"] in flowchartOperators:
+                    flowchartResponse["links"]["create"][linkKey] = { "from" : linkValue["from"], "to" : linkValue["to"], "color" : "#3dbeff" }
+                else:
+                    linkPopList.append(linkKey)
             elif flowchartLinks[linkKey]["color"] != color:
                 flowchartResponse["links"]["update"][linkKey] = { "from" : linkValue["from"], "to" : linkValue["to"], "color" : "#3dbeff" }
+        for link in linkPopList:
+            del dashboard.monitorLinks[link]
 
     # Checking for deleted operators
     for flowchartOperator in flowchartOperators:

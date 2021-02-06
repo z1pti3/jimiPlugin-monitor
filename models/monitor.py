@@ -22,6 +22,7 @@ class _monitorWebDashboard(jimi.db._document):
     name = str()
     dashboardLayout = dict()
     monitorLinks = dict()
+    image = str()
 
     def new(self, acl, name):
         self.acl = acl
