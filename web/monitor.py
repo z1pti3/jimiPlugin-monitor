@@ -65,6 +65,21 @@ def getDashboard(dashboardID):
                 return "/plugin/monitor/includes/switch-up.svg"
             else:
                 return "/plugin/monitor/includes/switch-down.svg"
+        elif itemType == "loadbalancer":
+            if up:
+                return "/plugin/monitor/includes/loadbalancer-up.svg"
+            else:
+                return "/plugin/monitor/includes/loadbalancer-down.svg"
+        elif itemType == "user":
+            if up:
+                return "/plugin/monitor/includes/user-up.svg"
+            else:
+                return "/plugin/monitor/includes/user-down.svg"
+        elif itemType == "server":
+            if up:
+                return "/plugin/monitor/includes/server-up.svg"
+            else:
+                return "/plugin/monitor/includes/server-down.svg"
         elif itemType == "cloud":
             return "/plugin/monitor/includes/cloud.svg"
         return None
