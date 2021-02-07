@@ -149,8 +149,10 @@ def getDashboard(dashboardID):
         up = monitorItemsDict[dashboardItem["monitorId"]]["up"]
         try:
             size = dashboardItem["size"]
+            if size < 1:
+                size = 1
         except KeyError:
-            size = 25
+            size = 3
         node = {}
         color = "green"
         if not up:
@@ -169,11 +171,11 @@ def getDashboard(dashboardID):
                 pass
             node["borderWidth"] = 1
             node["borderWidthSelected"] = 2.5
-            node["font"] = { "color" : "#ddd", "multi": True }
+            node["font"] = { "size" : 4 * size, "color" : "#ddd", "multi": True }
             node["shadow"] = { "enabled": True, "color": 'rgba(0, 0, 0, 0.12)',	"size": 10, "x": 5, "y": 5	}
             node["label"] = name
             node["color"] = { "border" : "#2e6da4", "background" : color, "highlight" : { "background" : "#2a2a2a" }, "hover" : { "background" : color } }
-            node["size"] = size
+            node["size"] = 5 * size
         else:
             if dashboardItem["x"] != flowchartOperators[dashboardID]["node"]["x"] or dashboardItem["y"] != flowchartOperators[dashboardID]["node"]["y"]:
                 node["x"] = dashboardItem["x"]
@@ -188,8 +190,9 @@ def getDashboard(dashboardID):
                 except KeyError:
                     pass
                 node["color"] = { "border" : "#2e6da4", "background" : color, "highlight" : { "background" : "#2a2a2a" }, "hover" : { "background" : color } }
-            if size != flowchartOperators[dashboardID]["node"]["size"]:
-                node["size"] = size
+            if 5 * size != flowchartOperators[dashboardID]["node"]["size"]:
+                node["font"] = { "size" : 4 * size, "color" : "#ddd", "multi": True }
+                node["size"] = 5 * size
         if node:
             flowchartResponse["operators"][flowchartResponseType][dashboardID] = { "_id" : dashboardID, "flowID" : dashboardID, "name" : name, "node" : node }
 
@@ -306,10 +309,12 @@ def dashboardSizeMonitorItem(dashboardID,dashboardObjectId,size):
         return {},404
     try:
         if size == "+":
-            dashboard.dashboardLayout[dashboardObjectId]["size"] += 10
+            dashboard.dashboardLayout[dashboardObjectId]["size"] += 1
         elif size == "-":
-            dashboard.dashboardLayout[dashboardObjectId]["size"] -= 10
+            dashboard.dashboardLayout[dashboardObjectId]["size"] -= 1
+        if dashboard.dashboardLayout[dashboardObjectId]["size"] < 1:
+            dashboard.dashboardLayout[dashboardObjectId]["size"] = 1
     except KeyError:
-        dashboard.dashboardLayout[dashboardObjectId]["size"] = 25
+        dashboard.dashboardLayout[dashboardObjectId]["size"] = 3
     dashboard.update(["dashboardLayout"])
     return { }, 200
