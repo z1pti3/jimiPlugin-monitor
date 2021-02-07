@@ -145,7 +145,7 @@ function createLinkRAW(from,to,color) {
 		smooth: {
 			enabled: true,
 			type: "cubicBezier",
-			roundness: 0.3
+			roundness: 0.0
 		},
 		width: 1.5
 	 });
