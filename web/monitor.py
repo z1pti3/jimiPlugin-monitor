@@ -97,6 +97,26 @@ def getDashboard(dashboardID):
                 return "/plugin/monitor/includes/server-up.svg"
             else:
                 return "/plugin/monitor/includes/server-down.svg"
+        elif itemType == "computer":
+            if up:
+                return "/plugin/monitor/includes/computer-up.svg"
+            else:
+                return "/plugin/monitor/includes/computer-down.svg"
+        elif itemType == "ap":
+            if up:
+                return "/plugin/monitor/includes/ap-up.svg"
+            else:
+                return "/plugin/monitor/includes/ap-down.svg"
+        elif itemType == "building":
+            if up:
+                return "/plugin/monitor/includes/building-up.svg"
+            else:
+                return "/plugin/monitor/includes/building-down.svg"
+        elif itemType == "vpn":
+            if up:
+                return "/plugin/monitor/includes/vpn-up.svg"
+            else:
+                return "/plugin/monitor/includes/vpn-down.svg"
         elif itemType == "cloud":
             return "/plugin/monitor/includes/cloud.svg"
         return None
