@@ -1,7 +1,7 @@
 import jimi
 
 class _monitor(jimi.plugin._plugin):
-    version = 0.3
+    version = 0.4
 
     def install(self):
         # Register models

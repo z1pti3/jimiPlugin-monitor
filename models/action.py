@@ -2,6 +2,7 @@ import time
 import subprocess
 import re
 import platform
+from pythonping import ping
 
 from plugins.monitor.models import monitor
 
@@ -63,68 +64,28 @@ class _monitorPing(jimi.action._action):
 		actionResult["result"] = False
 		actionResult["up"] = False
 		actionResult["rc"] = 999
-		if platform.system() == "Windows":
-			ping = subprocess.Popen(["ping", "-n", "3", host], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-			out, error = ping.communicate()
-			out=out.decode()
-			if "could not find host" in out:
+		try:
+			pingResult = ping(host, count=3)
+			actionResult["result"] = True
+			actionResult["rc"] = 0
+			actionResult["up"] = True
+			actionResult["sent"] = 3
+			actionResult["lost"] = float(pingResult.packets_lost*100)
+			if actionResult["lost"] < 100:
+				actionResult["min_rtt"] = float(pingResult.rtt_min_ms)
+				actionResult["max_rtt"] = float(pingResult.rtt_max_ms)
+				actionResult["avg_rtt"] = float(pingResult.rtt_avg_ms)
+			else:
+				actionResult["min_rtt"] = -1
+				actionResult["max_rtt"] = -1
+				actionResult["avg_rtt"] = -1
+		except Exception as e:
+			if "Cannot resolve address" in str(e):
 				actionResult["result"] = False
 				actionResult["rc"] = 2
 				actionResult["up"] = False
 				actionResult["msg"] = "Host not found"
-			else:
-				outPacketMatches = re.findall('Packets: Sent = ([0-9]+), Received = ([0-9]+), Lost = ([0-9]+)',out)
-				outResponseMatches = re.findall('Minimum = ([0-9]+)ms, Maximum = ([0-9]+)ms, Average = ([0-9]+)ms',out)
-				if outResponseMatches:
-					actionResult["result"] = True
-					actionResult["rc"] = 0
-					actionResult["up"] = True
-					actionResult["sent"] = int(outPacketMatches[0][0])
-					actionResult["received"] = int(outPacketMatches[0][1])
-					actionResult["lost"] = int(outPacketMatches[0][2])
-					actionResult["min_rtt"] = int(outResponseMatches[0][0])
-					actionResult["max_rtt"] = int(outResponseMatches[0][1])
-					actionResult["avg_rtt"] = int(outResponseMatches[0][2])
-				else:
-					actionResult["result"] = False
-					actionResult["rc"] = 9
-					actionResult["msg"] = "No response"
-					actionResult["up"] = False
-					actionResult["sent"] = int(outPacketMatches[0][0])
-					actionResult["received"] = int(outPacketMatches[0][1])
-					actionResult["lost"] = int(outPacketMatches[0][2])
-		elif platform.system() == "Linux":
-			ping = subprocess.Popen(["ping", "-c", "3", host], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-			out, error = ping.communicate()
-			out=out.decode()
-			if "Name or service not known" in out:
-				actionResult["result"] = False
-				actionResult["rc"] = 2
-				actionResult["up"] = False
-				actionResult["msg"] = "Host not found"
-			else:
-				outPacketMatches = re.findall('([0-9]+) packets transmitted, ([0-9]+) received, ([0-9]+)% packet loss',out)
-				outResponseMatches = re.findall('rtt min/avg/max/mdev = ([0-9\.]+)/([0-9\.]+)/([0-9\.]+)/',out)
-				if outResponseMatches:
-					actionResult["result"] = True
-					actionResult["rc"] = 0
-					actionResult["up"] = True
-					actionResult["sent"] = int(outPacketMatches[0][0])
-					actionResult["received"] = int(outPacketMatches[0][1])
-					actionResult["lost"] = int(outPacketMatches[0][0]) - int(outPacketMatches[0][1])
-					actionResult["min_rtt"] = float(outResponseMatches[0][0])
-					actionResult["max_rtt"] = float(outResponseMatches[0][2])
-					actionResult["avg_rtt"] = float(outResponseMatches[0][1])
-				else:
-					actionResult["result"] = False
-					actionResult["rc"] = 9
-					actionResult["msg"] = "No response"
-					actionResult["up"] = False
-					actionResult["sent"] = int(outPacketMatches[0][0])
-					actionResult["received"] = int(outPacketMatches[0][1])
-					actionResult["lost"] = int(outPacketMatches[0][0]) - int(outPacketMatches[0][1])
 		return actionResult
-
 
 class _monitorGetStatus(jimi.action._action):
 	itemName = str()
