@@ -22,29 +22,29 @@ def urlencode_filter(s):
     s = urllib.parse.quote_plus(s)
     return Markup(s)
 
-@pluginPages.route('/monitor/includes/<file>')
+@pluginPages.route('/includes/<file>')
 def custom_static(file):
     # Directroy transversal safe?
     return send_from_directory(str(Path("plugins/monitor/web/includes")), file)
 
-@pluginPages.route("/monitor/", methods=["GET"])
+@pluginPages.route("/", methods=["GET"])
 def mainPage():
     dashboards = monitor._monitorWebDashboard().query(sessionData=jimi.api.g.sessionData,query={},fields=["name"])["results"]
     return render_template("dashboards.html", dashboards=dashboards, CSRF=jimi.api.g.sessionData["CSRF"])
 
-@pluginPages.route("/monitor/", methods=["PUT"])
+@pluginPages.route("/", methods=["PUT"])
 def newDashboard():
     data = json.loads(jimi.api.request.data)
     monitor._monitorWebDashboard().new({"ids" : [ { "accessID" : jimi.api.g.sessionData["primaryGroup"], "read" : True, "write" : True, "delete" : True } ]},data["dashboardName"])
     return { }, 200
 
-@pluginPages.route("/monitor/", methods=["DELETE"])
+@pluginPages.route("/", methods=["DELETE"])
 def deleteDashboard():
     data = json.loads(jimi.api.request.data)
     monitor._monitorWebDashboard().api_delete(id=data["id"])
     return { }, 200
 
-@pluginPages.route("/monitor/dashboard/", methods=["GET"])
+@pluginPages.route("/dashboard/", methods=["GET"])
 def dashboardPage():
     dashboardID = request.args.get('dashboardID')
     dashboard = monitor._monitorWebDashboard().getAsClass(jimi.api.g.sessionData,id=dashboardID)
@@ -53,7 +53,7 @@ def dashboardPage():
         return render_template("dashboard.html", CSRF=jimi.api.g.sessionData["CSRF"], image=dashboard.image)
     return {}, 404
 
-@pluginPages.route("/monitor/dashboard/<dashboardID>/image/", methods=["GET"])
+@pluginPages.route("/dashboard/<dashboardID>/image/", methods=["GET"])
 def dashboardSetImage(dashboardID):
     image = request.args.get('image')
     dashboard = monitor._monitorWebDashboard().getAsClass(jimi.api.g.sessionData,id=dashboardID)
@@ -64,7 +64,7 @@ def dashboardSetImage(dashboardID):
         return {}, 200
     return {}, 404
 
-@pluginPages.route("/monitor/dashboard/<dashboardID>/", methods=["POST"])
+@pluginPages.route("/dashboard/<dashboardID>/", methods=["POST"])
 def getDashboard(dashboardID):
     def getIcon(itemType,up):
         if itemType == "firewall":
@@ -220,7 +220,7 @@ def getDashboard(dashboardID):
 
     return flowchartResponse, 200
 
-@pluginPages.route("/monitor/dashboard/<dashboardID>/<dashboardObjectId>/", methods=["DELETE"])
+@pluginPages.route("/dashboard/<dashboardID>/<dashboardObjectId>/", methods=["DELETE"])
 def dashboardDeleteMonitorItem(dashboardID,dashboardObjectId):
     dashboard = monitor._monitorWebDashboard().getAsClass(jimi.api.g.sessionData,id=dashboardID)
     if len(dashboard) == 1:
@@ -231,7 +231,7 @@ def dashboardDeleteMonitorItem(dashboardID,dashboardObjectId):
     dashboard.update(["dashboardLayout"])
     return { }, 200
 
-@pluginPages.route("/monitor/dashboard/<dashboardID>/move/<dashboardObjectId>/<x>/<y>/", methods=["POST"])
+@pluginPages.route("/dashboard/<dashboardID>/move/<dashboardObjectId>/<x>/<y>/", methods=["POST"])
 def dashboardMoveMonitorItem(dashboardID,dashboardObjectId,x,y):
     dashboard = monitor._monitorWebDashboard().getAsClass(jimi.api.g.sessionData,id=dashboardID)
     if len(dashboard) == 1:
@@ -243,7 +243,7 @@ def dashboardMoveMonitorItem(dashboardID,dashboardObjectId,x,y):
     dashboard.update(["dashboardLayout"])
     return { }, 200
 
-@pluginPages.route("/monitor/dashboard/<dashboardID>/add/<itemID>/<x>/<y>/", methods=["PUT"])
+@pluginPages.route("/dashboard/<dashboardID>/add/<itemID>/<x>/<y>/", methods=["PUT"])
 def dashboardAddMonitorItem(dashboardID,itemID,x,y):
     dashboard = monitor._monitorWebDashboard().getAsClass(jimi.api.g.sessionData,id=dashboardID)
     if len(dashboard) == 1:
@@ -255,12 +255,12 @@ def dashboardAddMonitorItem(dashboardID,itemID,x,y):
     dashboard.update(["dashboardLayout"])
     return { }, 200
 
-@pluginPages.route("/monitor/items/", methods=["GET"])
+@pluginPages.route("/items/", methods=["GET"])
 def getMonitorObjects():
     monitorItems = monitor._monitor().query(sessionData=jimi.api.g.sessionData,query={},fields=["name"])
     return monitorItems, 200
 
-@pluginPages.route("/monitor/dashboard/<dashboardID>/link/<dashboardObjectFrom>/<dashboardObjectTo>/", methods=["PUT"])
+@pluginPages.route("/dashboard/<dashboardID>/link/<dashboardObjectFrom>/<dashboardObjectTo>/", methods=["PUT"])
 def dashboardLinkMonitorItems(dashboardID,dashboardObjectFrom,dashboardObjectTo):
     dashboard = monitor._monitorWebDashboard().getAsClass(jimi.api.g.sessionData,id=dashboardID)
     if len(dashboard) == 1:
@@ -272,7 +272,7 @@ def dashboardLinkMonitorItems(dashboardID,dashboardObjectFrom,dashboardObjectTo)
     dashboard.update(["monitorLinks"])
     return { }, 200
 
-@pluginPages.route("/monitor/dashboard/<dashboardID>/link/<dashboardObjectFrom>/<dashboardObjectTo>/", methods=["DELETE"])
+@pluginPages.route("/dashboard/<dashboardID>/link/<dashboardObjectFrom>/<dashboardObjectTo>/", methods=["DELETE"])
 def dashboardDeleteLink(dashboardID,dashboardObjectFrom,dashboardObjectTo):
     dashboard = monitor._monitorWebDashboard().getAsClass(jimi.api.g.sessionData,id=dashboardID)
     if len(dashboard) == 1:
@@ -284,7 +284,7 @@ def dashboardDeleteLink(dashboardID,dashboardObjectFrom,dashboardObjectTo):
     dashboard.update(["monitorLinks"])
     return { }, 200
 
-@pluginPages.route("/monitor/add/<itemName>/<itemType>/<itemStatus>/", methods=["GET"])
+@pluginPages.route("/add/<itemName>/<itemType>/<itemStatus>/", methods=["GET"])
 def monitorItemCreate(itemName,itemType,itemStatus):
     monitorItem = monitor._monitor().getAsClass(jimi.api.g.sessionData,query={"name" : itemName})
     if len(monitorItem) > 0:
@@ -300,7 +300,7 @@ def monitorItemCreate(itemName,itemType,itemStatus):
         return { }, 201
     return { }, 404
 
-@pluginPages.route("/monitor/dashboard/<dashboardID>/size/<dashboardObjectId>/<size>/", methods=["POST"])
+@pluginPages.route("/dashboard/<dashboardID>/size/<dashboardObjectId>/<size>/", methods=["POST"])
 def dashboardSizeMonitorItem(dashboardID,dashboardObjectId,size):
     dashboard = monitor._monitorWebDashboard().getAsClass(jimi.api.g.sessionData,id=dashboardID)
     if len(dashboard) == 1:
