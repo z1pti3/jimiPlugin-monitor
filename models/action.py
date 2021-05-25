@@ -3,6 +3,7 @@ import subprocess
 import re
 import platform
 from pythonping import ping
+import socket
 
 from plugins.monitor.models import monitor
 
@@ -87,6 +88,30 @@ class _monitorPing(jimi.action._action):
 				actionResult["rc"] = 2
 				actionResult["up"] = False
 				actionResult["msg"] = "Host not found"
+		return actionResult
+
+class _monitorTCPCheck(jimi.action._action):
+	host = str()
+	port = int()
+	timeout = 10
+
+	def run(self,data,persistentData,actionResult):
+		host = jimi.helpers.evalString(self.host,{"data" : data})
+		actionResult["result"] = False
+		actionResult["up"] = False
+		actionResult["rc"] = 999
+		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		sock.settimeout(self.timeout)
+		try:
+			sock.connect((host,self.port))
+			actionResult["result"] = True
+			actionResult["rc"] = 0
+			actionResult["up"] = True
+		except Exception as e:
+			actionResult["result"] = False
+			actionResult["rc"] = 2
+			actionResult["up"] = False
+			actionResult["msg"] = "Failed to connect"
 		return actionResult
 
 class _monitorGetStatus(jimi.action._action):
