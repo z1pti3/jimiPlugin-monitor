@@ -58,6 +58,8 @@ class _monitorMSSQL(jimi.action._action):
 
 class _monitorPing(jimi.action._action):
 	host = str()
+	count = 3
+	timeout = 2
 
 	def run(self,data,persistentData,actionResult):
 		host = jimi.helpers.evalString(self.host,{"data" : data})
@@ -65,11 +67,11 @@ class _monitorPing(jimi.action._action):
 		actionResult["up"] = False
 		actionResult["rc"] = 999
 		try:
-			pingResult = ping(host, count=3)
+			pingResult = ping(host, timeout=self.timeout, count=self.count)
 			actionResult["result"] = True
 			actionResult["rc"] = 0
 			actionResult["up"] = True
-			actionResult["sent"] = 3
+			actionResult["sent"] = len(pingResult._responses)
 			actionResult["lost"] = float(pingResult.packets_lost*100)
 			if actionResult["lost"] < 100:
 				actionResult["min_rtt"] = float(pingResult.rtt_min_ms)
