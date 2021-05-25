@@ -104,6 +104,7 @@ class _monitorTCPCheck(jimi.action._action):
 		sock.settimeout(self.timeout)
 		try:
 			sock.connect((host,self.port))
+			sock.close()
 			actionResult["result"] = True
 			actionResult["rc"] = 0
 			actionResult["up"] = True
