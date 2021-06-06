@@ -1,0 +1,17 @@
+{
+   "name": "monitor",
+   "author": "z1p",
+   "version": 0.5,
+   "categories": [],
+   "description": "",
+   "icon": null,
+   "requirements": {
+      "jimi_min_version": null,
+      "jimi_max_version": null,
+      "plugins": []
+   },
+   "collections": {},
+   "triggers": {},
+   "actions": {},
+   "settings": {}
+}
