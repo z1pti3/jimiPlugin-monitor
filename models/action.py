@@ -2,6 +2,7 @@ import time
 import subprocess
 import re
 import platform
+from pythonping import ping
 import socket
 
 from plugins.monitor.models import monitor
@@ -75,6 +76,11 @@ class _monitorPing(jimi.action._action):
 				actionResult["rc"] = 2
 				actionResult["up"] = False
 				actionResult["msg"] = "Host not found"
+			elif "Destination Net Unreachable" in out:
+				actionResult["result"] = False
+				actionResult["rc"] = 2
+				actionResult["up"] = False
+				actionResult["msg"] = "Destination Net Unreachable"
 			else:
 				outPacketMatches = re.findall('Packets: Sent = ([0-9]+), Received = ([0-9]+), Lost = ([0-9]+)',out)
 				outResponseMatches = re.findall('Minimum = ([0-9]+)ms, Maximum = ([0-9]+)ms, Average = ([0-9]+)ms',out)
@@ -105,6 +111,11 @@ class _monitorPing(jimi.action._action):
 				actionResult["rc"] = 2
 				actionResult["up"] = False
 				actionResult["msg"] = "Host not found"
+			elif "Destination Net Unreachable" in out:
+				actionResult["result"] = False
+				actionResult["rc"] = 2
+				actionResult["up"] = False
+				actionResult["msg"] = "Destination Net Unreachable"
 			else:
 				outPacketMatches = re.findall('([0-9]+) packets transmitted, ([0-9]+) received, ([0-9]+)% packet loss',out)
 				outResponseMatches = re.findall('rtt min/avg/max/mdev = ([0-9\.]+)/([0-9\.]+)/([0-9\.]+)/',out)
