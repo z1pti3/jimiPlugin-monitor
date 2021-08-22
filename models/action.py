@@ -2,7 +2,6 @@ import time
 import subprocess
 import re
 import platform
-from pythonping import ping
 import socket
 
 from plugins.monitor.models import monitor
@@ -119,24 +118,31 @@ class _monitorPing(jimi.action._action):
 			else:
 				outPacketMatches = re.findall('([0-9]+) packets transmitted, ([0-9]+) received, ([0-9]+)% packet loss',out)
 				outResponseMatches = re.findall('rtt min/avg/max/mdev = ([0-9\.]+)/([0-9\.]+)/([0-9\.]+)/',out)
-				if outResponseMatches:
-					actionResult["result"] = True
-					actionResult["rc"] = 0
-					actionResult["up"] = True
-					actionResult["sent"] = int(outPacketMatches[0][0])
-					actionResult["received"] = int(outPacketMatches[0][1])
-					actionResult["lost"] = int(outPacketMatches[0][0]) - int(outPacketMatches[0][1])
-					actionResult["min_rtt"] = float(outResponseMatches[0][0])
-					actionResult["max_rtt"] = float(outResponseMatches[0][2])
-					actionResult["avg_rtt"] = float(outResponseMatches[0][1])
-				else:
+				try:
+					if outResponseMatches:
+						actionResult["result"] = True
+						actionResult["rc"] = 0
+						actionResult["up"] = True
+						actionResult["sent"] = int(outPacketMatches[0][0])
+						actionResult["received"] = int(outPacketMatches[0][1])
+						actionResult["lost"] = int(outPacketMatches[0][0]) - int(outPacketMatches[0][1])
+						actionResult["min_rtt"] = float(outResponseMatches[0][0])
+						actionResult["max_rtt"] = float(outResponseMatches[0][2])
+						actionResult["avg_rtt"] = float(outResponseMatches[0][1])
+					else:
+						actionResult["result"] = False
+						actionResult["rc"] = 9
+						actionResult["msg"] = "No response"
+						actionResult["up"] = False
+						actionResult["sent"] = int(outPacketMatches[0][0])
+						actionResult["received"] = int(outPacketMatches[0][1])
+						actionResult["lost"] = int(outPacketMatches[0][0]) - int(outPacketMatches[0][1])
+				except IndexError:
 					actionResult["result"] = False
-					actionResult["rc"] = 9
-					actionResult["msg"] = "No response"
+					actionResult["rc"] = 255
 					actionResult["up"] = False
-					actionResult["sent"] = int(outPacketMatches[0][0])
-					actionResult["received"] = int(outPacketMatches[0][1])
-					actionResult["lost"] = int(outPacketMatches[0][0]) - int(outPacketMatches[0][1])
+					actionResult["msg"] = "Error"
+					actionResult["debug-outResponseMatches"] = outResponseMatches
 		return actionResult
 
 class _monitorTCPCheck(jimi.action._action):
