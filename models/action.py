@@ -38,7 +38,7 @@ class _monitorMSSQL(jimi.action._action):
 			
 		startTime=time.time()
 		try:
-			connection = pyodbc.connect("Driver={0};Server={1};Database={2};uid={3};pwd={4}".format(pyodbc.drivers()[0],host,database,username,password),timeout=timeout)
+			connection = pyodbc.connect("Driver={0};Server={1};Database={2};uid={3};pwd={4}".format("ODBC Driver 17 for SQL Server",host,database,username,password),timeout=timeout)
 			connection.close()
 			endTime=time.time()
 			duration = endTime - startTime
