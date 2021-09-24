@@ -1,7 +1,7 @@
 import jimi
 
 class _monitor(jimi.plugin._plugin):
-    version = 0.5
+    version = 0.62
 
     def install(self):
         # Register models
@@ -35,4 +35,6 @@ class _monitor(jimi.plugin._plugin):
             jimi.model.registerModel("monitorWebDashboard","_monitorWebDashboard","_document","plugins.monitor.models.monitor")
         if self.version < 0.5:
             jimi.model.registerModel("monitorTCPCheck","_monitorTCPCheck","_action","plugins.monitor.models.action")
+        if self.version < 0.62:
+            jimi.model.registerModel("monitorWebTopology","_monitorWebTopology","_document","plugins.monitor.models.monitor")
         return True

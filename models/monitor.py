@@ -30,3 +30,17 @@ class _monitorWebDashboard(jimi.db._document):
         return super(_monitorWebDashboard, self).new()
 
     _dbCollection = jimi.db.db["monitorWebDashboard"]
+
+class _monitorWebTopology(jimi.db._document):
+    name = str()
+    nodes = dict()
+    edges = dict()
+    topologyData = dict()
+
+    def new(self, acl, name, topologyData):
+        self.acl = acl
+        self.name = name
+        self.topologyData = topologyData
+        return super(_monitorWebTopology, self).new()
+
+    _dbCollection = jimi.db.db["monitorWebTopology"]

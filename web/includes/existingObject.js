@@ -74,10 +74,10 @@ function createExistingObjectPanel() {
 		var posY = e.clientY;
 		var panel = $(existingObjectHTML);
 		panel.css({top : posY, left : posX - 250});
-		panel.draggable();
-		panel.resizable({
-			grid: 20
-		});
+		// panel.draggable();
+		// panel.resizable({
+		// 	grid: 20
+		// });
 
 		// Events
 		panel.click(function () {

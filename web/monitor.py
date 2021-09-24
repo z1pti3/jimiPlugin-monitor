@@ -318,3 +318,56 @@ def dashboardSizeMonitorItem(dashboardID,dashboardObjectId,size):
         dashboard.dashboardLayout[dashboardObjectId]["size"] = 3
     dashboard.update(["dashboardLayout"])
     return { }, 200
+
+@pluginPages.route("/topologies/<topologyID>/", methods=["GET"])
+def topologyPage(topologyID):
+    topology = monitor._monitorWebTopology().getAsClass(jimi.api.g.sessionData,id=topologyID)
+    if len(topology) == 1:
+        topology = topology[0]
+        return render_template("topology.html", CSRF=jimi.api.g.sessionData["CSRF"])
+    return {}, 404
+
+@pluginPages.route("/topologies/", methods=["GET"])
+def topologiesPage():
+    topologies = monitor._monitorWebTopology().query(sessionData=jimi.api.g.sessionData,query={},fields=["name"])["results"]
+    return render_template("topologies.html", topologies=topologies, CSRF=jimi.api.g.sessionData["CSRF"])
+
+@pluginPages.route("/topologies/", methods=["PUT"])
+def newTopology():
+    data = json.loads(jimi.api.request.data)
+    monitor._monitorWebTopology().new({"ids" : [ { "accessID" : jimi.api.g.sessionData["primaryGroup"], "read" : True, "write" : True, "delete" : True } ]},data["topologyName"],{})
+    return { }, 200
+
+@pluginPages.route("/topologies/", methods=["DELETE"])
+def deleteTopology():
+    data = json.loads(jimi.api.request.data)
+    # monitor._monitorWebTopology().delete({"ids" : [ { "accessID" : jimi.api.g.sessionData["primaryGroup"], "read" : True, "write" : True, "delete" : True } ]},data["topologyName"],{})
+    return { }, 200
+
+@pluginPages.route("/topologies/<topologyID>/get/")
+def getTopology(topologyID):
+    topology = monitor._monitorWebTopology().query(sessionData=jimi.api.g.sessionData,id=topologyID)["results"]
+    if len(topology) > 0:
+        topology = topology[0]
+    nodesDict = {}
+    edgesDict = {}
+    topologyData = topology["topologyData"]
+
+    for item in topologyData:
+        if topologyData[item]["name"] not in nodesDict:
+            nodesDict[topologyData[item]["name"]] = { "id" : topologyData[item]["name"], "label" : topologyData[item]["name"], "value" : 1}
+        else:
+            nodesDict[topologyData[item]["name"]]["value"] += 1
+        for link in topologyData[item]["links"]:
+            key = f"{item.lower()}-{link.lower()}"
+            revKey = f"{link.lower()}-{item.lower()}"
+            if revKey in edgesDict:
+                edgesDict[key] = { "id" : key, "from" : item, "to" : link, "label" : "{}".format(",".join(topologyData[item]["links"][link])) }
+            elif key not in edgesDict:
+                edgesDict[key] = { "id" : key, "from" : item, "to" : link, "label" : "{}".format(",".join(topologyData[item]["links"][link])) }
+                
+                
+    nodes = [ x for x in nodesDict.values() ]
+    edges = [ x for x in edgesDict.values() ]
+
+    return { "nodes" : nodes, "edges" : edges }, 200

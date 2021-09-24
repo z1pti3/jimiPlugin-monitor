@@ -217,7 +217,6 @@ class _monitorSetStatus(jimi.action._action):
 			actionResult["result"] = True
 			actionResult["rc"] = 0
 			return actionResult
-		
 
 def getMonitorItem(itemName,sessionData):
 	return monitor._monitor().getAsClass(query={ "name" : itemName })
